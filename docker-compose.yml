@@ -1,0 +1,29 @@
+﻿services:
+  db:
+    image: postgres:15
+    container_name: nl2sql_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nl2sql
+      POSTGRES_USER: nl2sql_user
+      POSTGRES_PASSWORD: nl2sql_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
+  backend:
+    build: ./backend
+    container_name: nl2sql_backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+
+volumes:
+  postgres_data:
