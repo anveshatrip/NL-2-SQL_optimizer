@@ -10,57 +10,29 @@ from typing import List, Optional, Dict, Any
 # ── Request Models ─────────────────────────────────────────────────────────────
 
 class TranslateRequest(BaseModel):
-    """Payload for NL -> SQL translation (single provider)."""
-    nl_query: str = Field(
-        ...,
-        min_length=5,
-        description="Natural language query to translate into SQL",
-        examples=["Show me all orders placed by users from India"],
-    )
-    provider: Optional[str] = Field(
-        default="gemini",
-        description="LLM provider: 'gemini' | 'openai' | 'anthropic'",
-    )
-    model: Optional[str] = Field(
-        default=None,
-        description="Specific model name. If omitted, uses provider default.",
+    nl_query: str = Field(..., min_length=5, examples=["Show all orders from users in India"])
+    provider: Optional[str] = Field(default="gemini", description="gemini | openai | anthropic")
+    model: Optional[str] = Field(default=None)
+
+
+class AnalyzeRequest(BaseModel):
+    nl_query: str = Field(..., min_length=5, examples=["Show all orders from users in India"])
+    provider: Optional[str] = Field(default="gemini")
+    model: Optional[str] = Field(default=None)
+    simulate_large: Optional[bool] = Field(
+        default=True,
+        description="Set enable_seqscan=OFF to simulate large-table behaviour on small datasets",
     )
 
 
 class CompareRequest(BaseModel):
-    """Payload for multi-provider comparison run."""
-    nl_query: str = Field(
-        ...,
-        min_length=5,
-        description="Natural language query to compare across providers",
-    )
-    providers: Optional[List[str]] = Field(
-        default=["gemini", "openai", "anthropic"],
-        description="Which providers to include in the comparison",
-    )
+    nl_query: str = Field(..., min_length=5)
+    providers: Optional[List[str]] = Field(default=["gemini", "openai", "anthropic"])
 
 
 # ── Sub-models ────────────────────────────────────────────────────────────────
 
-class ColumnInfo(BaseModel):
-    name: str
-    type: str
-
-
-class ForeignKeyInfo(BaseModel):
-    columns: List[str]
-    references: str
-
-
-class TableSchema(BaseModel):
-    columns: List[ColumnInfo]
-    primary_key: List[str]
-    foreign_keys: List[ForeignKeyInfo]
-    indexes: List[str]
-
-
 class ProviderResult(BaseModel):
-    """Result from a single provider for a comparison run."""
     provider: str
     model: str
     sql: str
@@ -69,13 +41,28 @@ class ProviderResult(BaseModel):
     total_tokens: int
     cost_usd: float
     latency_ms: float
-    error: Optional[str] = None   # set if the provider call failed
+    error: Optional[str] = None
+
+
+class AntiPatternInfo(BaseModel):
+    pattern_id: str
+    severity: str          # HIGH | MEDIUM | LOW
+    title: str
+    table: Optional[str]
+    description: str
+    suggestion: str
+
+
+class PlanSummary(BaseModel):
+    execution_time_ms: float
+    planning_time_ms: float
+    total_cost: float
+    node_types: List[str]  # list of all node types found in the plan tree
 
 
 # ── Response Models ────────────────────────────────────────────────────────────
 
 class TranslateResponse(BaseModel):
-    """Response from NL -> SQL translation (single provider)."""
     nl_query: str
     sql: str
     provider: str
@@ -87,13 +74,22 @@ class TranslateResponse(BaseModel):
     schema_tables_used: List[str]
 
 
-class CompareResponse(BaseModel):
-    """
-    Response from a multi-provider comparison.
+class AnalyzeResponse(BaseModel):
+    """Full pipeline response: NL -> SQL -> EXPLAIN -> Anti-patterns."""
+    nl_query: str
+    sql: str
+    provider: str
+    model: str
+    llm_cost_usd: float
+    llm_latency_ms: float
+    plan: PlanSummary
+    antipatterns: List[AntiPatternInfo]
+    antipattern_count: int
+    has_issues: bool
+    simulate_large: bool
 
-    The frontend uses this to render the side-by-side comparison table
-    with cost and latency bar charts.
-    """
+
+class CompareResponse(BaseModel):
     nl_query: str
     results: List[ProviderResult]
     cheapest_provider: Optional[str]
@@ -102,7 +98,6 @@ class CompareResponse(BaseModel):
 
 
 class SchemaResponse(BaseModel):
-    """Full schema introspection result."""
     tables: Dict[str, Any]
     table_count: int
 
