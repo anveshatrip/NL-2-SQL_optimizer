@@ -16,12 +16,19 @@ class TranslateRequest(BaseModel):
 
 
 class AnalyzeRequest(BaseModel):
-    nl_query: str = Field(..., min_length=5, examples=["Show all orders from users in India"])
+    nl_query: str = Field(..., min_length=5)
     provider: Optional[str] = Field(default="gemini")
+    model: Optional[str] = Field(default=None)
+    simulate_large: Optional[bool] = Field(default=True)
+
+
+class OptimizeRequest(BaseModel):
+    nl_query: str = Field(..., min_length=5, examples=["Show all orders from users in India"])
+    provider: Optional[str] = Field(default="gemini", description="gemini | openai | anthropic")
     model: Optional[str] = Field(default=None)
     simulate_large: Optional[bool] = Field(
         default=True,
-        description="Set enable_seqscan=OFF to simulate large-table behaviour on small datasets",
+        description="Use enable_seqscan=OFF to simulate large-table anti-patterns on small data",
     )
 
 
@@ -46,7 +53,7 @@ class ProviderResult(BaseModel):
 
 class AntiPatternInfo(BaseModel):
     pattern_id: str
-    severity: str          # HIGH | MEDIUM | LOW
+    severity: str
     title: str
     table: Optional[str]
     description: str
@@ -57,7 +64,16 @@ class PlanSummary(BaseModel):
     execution_time_ms: float
     planning_time_ms: float
     total_cost: float
-    node_types: List[str]  # list of all node types found in the plan tree
+    node_types: List[str]
+
+
+class LLMCallInfo(BaseModel):
+    provider: str
+    model: str
+    input_tokens: int
+    output_tokens: int
+    cost_usd: float
+    latency_ms: float
 
 
 # ── Response Models ────────────────────────────────────────────────────────────
@@ -75,7 +91,6 @@ class TranslateResponse(BaseModel):
 
 
 class AnalyzeResponse(BaseModel):
-    """Full pipeline response: NL -> SQL -> EXPLAIN -> Anti-patterns."""
     nl_query: str
     sql: str
     provider: str
@@ -86,6 +101,39 @@ class AnalyzeResponse(BaseModel):
     antipatterns: List[AntiPatternInfo]
     antipattern_count: int
     has_issues: bool
+    simulate_large: bool
+
+
+class OptimizeResponse(BaseModel):
+    """
+    Full before/after optimization comparison.
+    This is the core research output of the system.
+    """
+    nl_query: str
+
+    # ── Before ──────────────────────────────────────────────────────────────
+    original_sql: str
+    original_plan: PlanSummary
+    antipatterns: List[AntiPatternInfo]
+    antipattern_count: int
+
+    # ── After ───────────────────────────────────────────────────────────────
+    optimized_sql: str
+    optimized_plan: PlanSummary
+    issues_remaining: List[AntiPatternInfo]
+    issues_remaining_count: int
+
+    # ── Delta ────────────────────────────────────────────────────────────────
+    cost_reduction_pct: float      # positive = improvement
+    time_reduction_pct: float
+    improved: bool
+
+    # ── LLM metadata ─────────────────────────────────────────────────────────
+    translation_call: LLMCallInfo
+    optimization_call: LLMCallInfo
+    total_llm_cost_usd: float
+    total_llm_latency_ms: float
+
     simulate_large: bool
 
 

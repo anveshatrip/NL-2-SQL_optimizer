@@ -25,5 +25,17 @@
     volumes:
       - ./backend:/app
 
+  frontend:
+    build: ./frontend
+    container_name: nl2sql_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
 volumes:
   postgres_data:

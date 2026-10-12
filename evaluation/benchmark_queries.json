@@ -1,0 +1,62 @@
+﻿[
+  {
+    "id": "Q01",
+    "category": "Filter & Projection",
+    "nl_query": "Show all users from India with their email and registration date",
+    "expected_tables": ["users"]
+  },
+  {
+    "id": "Q02",
+    "category": "Single Join",
+    "nl_query": "List all orders placed by users from France with total order amount",
+    "expected_tables": ["users", "orders"]
+  },
+  {
+    "id": "Q03",
+    "category": "Multi-table Join",
+    "nl_query": "Show product names and unit prices for items ordered by users from Canada",
+    "expected_tables": ["users", "orders", "order_items", "products"]
+  },
+  {
+    "id": "Q04",
+    "category": "Aggregation & Grouping",
+    "nl_query": "Find the total revenue and number of orders grouped by country",
+    "expected_tables": ["users", "orders"]
+  },
+  {
+    "id": "Q05",
+    "category": "HAVING Filter",
+    "nl_query": "List product categories having more than 20 items in stock on average",
+    "expected_tables": ["products"]
+  },
+  {
+    "id": "Q06",
+    "category": "Subquery / Ranking",
+    "nl_query": "Find the top 5 highest spending users with their total spent amount",
+    "expected_tables": ["users", "orders"]
+  },
+  {
+    "id": "Q07",
+    "category": "Multi-Join & Filter",
+    "nl_query": "Show reviews with rating 5 written for products in the Electronics category",
+    "expected_tables": ["reviews", "products"]
+  },
+  {
+    "id": "Q08",
+    "category": "Date Range Aggregation",
+    "nl_query": "Count the number of delivered orders created in the last 180 days",
+    "expected_tables": ["orders"]
+  },
+  {
+    "id": "Q09",
+    "category": "Self-Join / Anti-Join",
+    "nl_query": "Find all users who have registered but never placed any order",
+    "expected_tables": ["users", "orders"]
+  },
+  {
+    "id": "Q10",
+    "category": "Complex Multi-Table Metric",
+    "nl_query": "Calculate the average review rating and total quantity sold for each product",
+    "expected_tables": ["products", "reviews", "order_items"]
+  }
+]
