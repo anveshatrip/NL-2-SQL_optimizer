@@ -1,4 +1,4 @@
-﻿"""
+"""
 models.py
 Pydantic v2 request/response models for the NL2SQL Optimizer API.
 """
@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 
 
-# ── Request Models ─────────────────────────────────────────────────────────────
+# â”€â”€ Request Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class TranslateRequest(BaseModel):
     nl_query: str = Field(..., min_length=5, examples=["Show all orders from users in India"])
-    provider: Optional[str] = Field(default="gemini", description="gemini | openai | anthropic")
+    provider: Optional[str] = Field(default="gemini", description="gemini | grok | nvidia")
     model: Optional[str] = Field(default=None)
 
 
@@ -24,7 +24,7 @@ class AnalyzeRequest(BaseModel):
 
 class OptimizeRequest(BaseModel):
     nl_query: str = Field(..., min_length=5, examples=["Show all orders from users in India"])
-    provider: Optional[str] = Field(default="gemini", description="gemini | openai | anthropic")
+    provider: Optional[str] = Field(default="gemini", description="gemini | grok | nvidia")
     model: Optional[str] = Field(default=None)
     simulate_large: Optional[bool] = Field(
         default=True,
@@ -34,10 +34,10 @@ class OptimizeRequest(BaseModel):
 
 class CompareRequest(BaseModel):
     nl_query: str = Field(..., min_length=5)
-    providers: Optional[List[str]] = Field(default=["gemini", "openai", "anthropic"])
+    providers: Optional[List[str]] = Field(default=["gemini", "grok", "nvidia"])
 
 
-# ── Sub-models ────────────────────────────────────────────────────────────────
+# â”€â”€ Sub-models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class ProviderResult(BaseModel):
     provider: str
@@ -76,7 +76,7 @@ class LLMCallInfo(BaseModel):
     latency_ms: float
 
 
-# ── Response Models ────────────────────────────────────────────────────────────
+# â”€â”€ Response Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class TranslateResponse(BaseModel):
     nl_query: str
@@ -111,24 +111,24 @@ class OptimizeResponse(BaseModel):
     """
     nl_query: str
 
-    # ── Before ──────────────────────────────────────────────────────────────
+    # â”€â”€ Before â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     original_sql: str
     original_plan: PlanSummary
     antipatterns: List[AntiPatternInfo]
     antipattern_count: int
 
-    # ── After ───────────────────────────────────────────────────────────────
+    # â”€â”€ After â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     optimized_sql: str
     optimized_plan: PlanSummary
     issues_remaining: List[AntiPatternInfo]
     issues_remaining_count: int
 
-    # ── Delta ────────────────────────────────────────────────────────────────
+    # â”€â”€ Delta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     cost_reduction_pct: float      # positive = improvement
     time_reduction_pct: float
     improved: bool
 
-    # ── LLM metadata ─────────────────────────────────────────────────────────
+    # â”€â”€ LLM metadata â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     translation_call: LLMCallInfo
     optimization_call: LLMCallInfo
     total_llm_cost_usd: float

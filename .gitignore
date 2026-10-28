@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 backend/__pycache__/
+*.pptx
+PROJECT_REPORT.md
+PROJECT_DEMO_REPORT.md

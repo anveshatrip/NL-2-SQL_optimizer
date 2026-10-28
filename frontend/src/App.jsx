@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Database, Play, Sparkles, AlertTriangle, ArrowRight, CheckCircle2, 
   BarChart3, RefreshCw, Zap, Clock, DollarSign, Layers, Table2, ShieldAlert
@@ -12,15 +12,13 @@ export default function App() {
   const [simulateLarge, setSimulateLarge] = useState(true);
   
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('optimize'); // 'optimize' | 'compare' | 'schema'
+  const [activeTab, setActiveTab] = useState('optimize');
   
-  // Results
   const [optimizeData, setOptimizeData] = useState(null);
   const [compareData, setCompareData] = useState(null);
   const [schemaData, setSchemaData] = useState(null);
   const [error, setError] = useState(null);
   
-  // Fetch Schema on mount
   useEffect(() => {
     fetchSchema();
   }, []);
@@ -75,7 +73,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nl_query: nlQuery,
-          providers: ['gemini', 'openai', 'anthropic'],
+          providers: ['gemini', 'grok', 'nvidia'],
         }),
       });
       if (!res.ok) {
@@ -150,9 +148,9 @@ export default function App() {
                   value={provider} 
                   onChange={(e) => setProvider(e.target.value)}
                   className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 outline-none focus:border-indigo-500">
-                  <option value="gemini">Gemini 2.0 Flash</option>
-                  <option value="openai">OpenAI (GPT-4o Mini)</option>
-                  <option value="anthropic">Anthropic (Claude 3.5 Haiku)</option>
+                  <option value="gemini">Gemini 3.5 Flash</option>
+                  <option value="grok">Groq (GPT-OSS 120B)</option>
+                  <option value="nvidia">NVIDIA (Llama 3.2 11B)</option>
                 </select>
               </div>
 
@@ -237,15 +235,23 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
-                <div className="p-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg">
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center gap-3">
+                <div className="p-3 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg shrink-0">
                   <Clock className="w-6 h-6" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-slate-400 font-medium">Execution Time</p>
-                  <p className="text-2xl font-bold text-slate-100">
-                    {optimizeData.original_plan.execution_time_ms}ms <span className="text-xs text-slate-400 font-normal">➔</span> {optimizeData.optimized_plan.execution_time_ms}ms
-                  </p>
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className="text-xl font-bold text-slate-100 whitespace-nowrap">
+                      {Math.round(optimizeData.optimized_plan.execution_time_ms)}ms
+                    </span>
+                    <span className="text-xs text-slate-400 line-through whitespace-nowrap">
+                      {Math.round(optimizeData.original_plan.execution_time_ms)}ms
+                    </span>
+                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 whitespace-nowrap">
+                      {optimizeData.time_reduction_pct > 0 ? `-${Math.round(optimizeData.time_reduction_pct)}%` : 'Same'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -346,7 +352,7 @@ export default function App() {
                       )}
                       <p className="text-xs text-slate-400 leading-relaxed">{ap.description}</p>
                       <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-xs text-cyan-300/90 font-mono mt-1">
-                        💡 {ap.suggestion}
+                        Suggestion: {ap.suggestion}
                       </div>
                     </div>
                   ))}
@@ -367,12 +373,12 @@ export default function App() {
               <div className="flex items-center gap-4 text-xs font-medium">
                 {compareData.cheapest_provider && (
                   <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    🏆 Lowest Cost: <b>{compareData.cheapest_provider.toUpperCase()}</b>
+                    Lowest Cost: <b>{compareData.cheapest_provider.toUpperCase()}</b>
                   </span>
                 )}
                 {compareData.fastest_provider && (
                   <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                    ⚡ Fastest Response: <b>{compareData.fastest_provider.toUpperCase()}</b>
+                    Fastest Response: <b>{compareData.fastest_provider.toUpperCase()}</b>
                   </span>
                 )}
               </div>
@@ -475,8 +481,10 @@ export default function App() {
                       <div className="pt-2 text-xs">
                         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Foreign Keys:</p>
                         {info.foreign_keys.map((fk, i) => (
-                          <div key={i} className="text-amber-300/80 text-[11px] font-mono">
-                            {fk.columns.join(', ')} ➔ {fk.references}
+                          <div key={i} className="text-amber-300/80 text-[11px] font-mono flex items-center gap-1">
+                            <span>{fk.columns.join(', ')}</span>
+                            <ArrowRight className="w-3 h-3 text-slate-400 inline" />
+                            <span>{fk.references}</span>
                           </div>
                         ))}
                       </div>

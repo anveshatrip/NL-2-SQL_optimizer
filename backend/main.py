@@ -1,4 +1,4 @@
-﻿"""
+"""
 main.py
 FastAPI application - NL2SQL Optimizer v0.4.0
 
@@ -34,7 +34,7 @@ from plan_parser import parse_explain_output
 from antipattern_detector import detect_antipatterns
 from optimizer import run_optimization_pipeline
 
-# ── Bootstrap ─────────────────────────────────────────────────────────────────
+# â”€â”€ Bootstrap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 load_dotenv()
 
@@ -63,7 +63,7 @@ app = FastAPI(
     title="NL2SQL Optimizer",
     description=(
         "Schema-aware NL-to-SQL translation with automated query optimization feedback. "
-        "Supports Gemini, OpenAI, and Anthropic with before/after cost comparison."
+        "Supports Gemini, xAI Grok, and NVIDIA NIM with before/after cost comparison."
     ),
     version=APP_VERSION,
     lifespan=lifespan,
@@ -78,7 +78,7 @@ app.add_middleware(
 )
 
 
-# ── Helper ────────────────────────────────────────────────────────────────────
+# â”€â”€ Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _ap_to_info(ap) -> AntiPatternInfo:
     return AntiPatternInfo(
@@ -91,7 +91,7 @@ def _ap_to_info(ap) -> AntiPatternInfo:
     )
 
 
-# ── Routes ────────────────────────────────────────────────────────────────────
+# â”€â”€ Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/health", response_model=HealthResponse, tags=["Infra"])
 def health_check():
@@ -175,7 +175,7 @@ def analyze(req: AnalyzeRequest):
 @app.post("/api/optimize", response_model=OptimizeResponse, tags=["Optimization"])
 def optimize(req: OptimizeRequest):
     """
-    Full optimization pipeline — the core research contribution.
+    Full optimization pipeline â€” the core research contribution.
 
     Runs two LLM calls and two EXPLAIN ANALYZE passes to produce a
     measurable before/after cost and execution time comparison.
@@ -262,7 +262,7 @@ def compare(req: CompareRequest):
     prompt  = build_translation_prompt(schema, req.nl_query)
     results = []
 
-    for provider in (req.providers or ["gemini", "openai", "anthropic"]):
+    for provider in (req.providers or ["gemini", "grok", "nvidia"]):
         try:
             r = call_llm(prompt, provider=provider, temperature=0.05)
             results.append(ProviderResult(
